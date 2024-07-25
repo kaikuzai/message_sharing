@@ -1,4 +1,3 @@
-import React from 'react'
 import useMessageCounter from './hooks/useCounter'
 
 
