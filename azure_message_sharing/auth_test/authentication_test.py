@@ -10,7 +10,6 @@ blob_service_client = BlobServiceClient(
         account_url=account_url,
         credential=default_credential)
 
-print(os.curdir)
 
 # creating a container
 container_name = str(uuid.uuid1())

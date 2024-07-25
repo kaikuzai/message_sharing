@@ -1,4 +1,6 @@
 import azure.functions as func
+from azure.identity import DefaultAzureCredential
+from azure.storage.blob import BlobServiceClient, ContainerClient
 import datetime
 import json
 import logging
@@ -25,3 +27,54 @@ def HttpExample(req: func.HttpRequest) -> func.HttpResponse:
              "This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response.",
              status_code=200
         )
+    
+@app.route(route="welcome", auth_level=func.AuthLevel.ANONYMOUS)
+def HttpWelcome(req: func.HttpRequest) -> func.HttpResponse:
+    logging.info('Python welcome Http trigger function handled a request')
+
+    response = {
+        "reply":"This is the welcome message"
+    }
+
+    return func.HttpResponse(
+        json.dumps(response),
+        mimetype="application/json",
+        status_code=200
+        )
+
+@app.route(route="MessageCounter", auth_level=func.AuthLevel.ANONYMOUS)
+def MessageCounter(req: func.HttpRequest) -> func.HttpResponse:
+    logging.info('Message Counter endpoint was triggered')
+
+    appended_list = []
+
+    default_credential = DefaultAzureCredential()
+    account_url = "https://messagesharingstorage.blob.core.windows.net/"
+    container_name = "messages"
+
+    # create blob service client 
+    blob_service_client = BlobServiceClient(
+        account_url=account_url, 
+        credential=default_credential
+        )
+
+    container_client = blob_service_client.get_container_client(
+        container=container_name
+        )
+
+    container_list = container_client.list_blobs()
+
+    for i in container_list:
+        appended_list.append(i.name)
+
+    list_size = len(appended_list)
+
+    response = {
+        "length":list_size
+    }
+
+    return func.HttpResponse(
+        json.dumps(response),
+        status_code=200, 
+        mimetype="application/json"
+    )
