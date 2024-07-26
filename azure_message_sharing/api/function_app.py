@@ -6,6 +6,9 @@ import json
 import logging
 
 app = func.FunctionApp()
+default_credential = DefaultAzureCredential()
+account_url = "https://messagesharingstorage.blob.core.windows.net/"
+container_name = "messages"
 
 @app.route(route="HttpExample", auth_level=func.AuthLevel.ANONYMOUS)
 def HttpExample(req: func.HttpRequest) -> func.HttpResponse:
@@ -48,9 +51,6 @@ def MessageCounter(req: func.HttpRequest) -> func.HttpResponse:
 
     appended_list = []
 
-    default_credential = DefaultAzureCredential()
-    account_url = "https://messagesharingstorage.blob.core.windows.net/"
-    container_name = "messages"
 
     # create blob service client 
     blob_service_client = BlobServiceClient(
@@ -78,3 +78,33 @@ def MessageCounter(req: func.HttpRequest) -> func.HttpResponse:
         status_code=200, 
         mimetype="application/json"
     )
+
+@app.route(route="MessageUploader", auth_level=func.AuthLevel.ANONYMOUS)
+def MessageReader(req: func.HttpRequest) -> func.HttpResponse:
+    logging.info('MessageReader has been initialized')
+
+    try:
+        req_body = req.get_json()
+        file_name = req_body.get('fileName')
+        file_content = req_body.get('content')
+
+        blob_client = BlobServiceClient(
+            account_url=account_url,
+            credential=default_credential
+            )
+        
+        
+        container_client = blob_client.get_container_client(
+            container=container_name
+        )
+
+        container_client.upload_blob(
+            name=file_name,
+            data=file_content,
+            overwrite=True 
+            )
+        
+
+
+    except Exception as exception:
+        logging.error(f'There was an error uploading the file: {exception}')

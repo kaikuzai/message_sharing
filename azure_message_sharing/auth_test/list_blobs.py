@@ -21,6 +21,7 @@ container_client = blob_service_client.get_container_client(
 container_list = container_client.list_blobs()
 
 for i in container_list:
-    appended_list.append(i.name)
+    print('***')
+    print(i)
 
 list_size = len(appended_list)
