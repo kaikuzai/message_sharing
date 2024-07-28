@@ -22,6 +22,6 @@ container_list = container_client.list_blobs()
 
 for i in container_list:
     print('***')
-    print(i)
+    print(f' name is {i.keys()}')
 
 list_size = len(appended_list)
